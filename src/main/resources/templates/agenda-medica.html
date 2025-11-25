@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Agenda Médica - Citas por Atender</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(120deg,#f0fcff 0, #dbeafe 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .agenda-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 34px rgba(13,110,253,0.10);
+            max-width: 1050px;
+            margin: 48px auto 32px auto;
+            padding: 3rem 2.5rem 2.3rem 2.5rem;
+        }
+        h2 {
+            color: #198754;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 1.7em;
+        }
+        .badge-atendida {
+            background: #28a745;
+            color: #fff;
+            font-size: 1.04em;
+            padding: 0.48em 1.02em;
+        }
+        .btn-attend { min-width: 102px;}
+        .btn-edit { min-width: 92px;}
+        @media (max-width: 700px) {
+            .agenda-card { padding: 0.7rem 0.6rem; }
+            h2 { font-size: 1.3em;}
+        }
+    </style>
+</head>
+<body>
+<div class="agenda-card">
+    <h2>Agenda Médica<br><small class="text-muted" style="font-size:0.57em;font-weight:400;">Citas por Atender</small></h2>
+    <div th:if="${#lists.isEmpty(citasPorAtender)}" class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No tienes citas pendientes por atender.
+    </div>
+    <div th:unless="${#lists.isEmpty(citasPorAtender)}" class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead class="table-success">
+                <tr>
+                    <th>Paciente</th>
+                    <th>Fecha y Hora</th>
+                    <th>Área Médica</th>
+                    <th>Diagnóstico</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="cita : ${citasPorAtender}">
+                    <td th:text="${cita.patient.firstName} + ' ' + ${cita.patient.lastName}"></td>
+                    <td th:text="${cita.dateTime}"></td>
+                    <td th:text="${cita.areaMedica}"></td>
+                    <td th:text="${cita.diagnosis}"></td>
+                    <td>
+                        <span th:if="${cita.status == 'RESERVADA'}" class="badge bg-primary">Reservada</span>
+                        <span th:if="${cita.status == 'CONFIRMADA'}" class="badge bg-warning text-dark">Confirmada</span>
+                        <span th:if="${cita.status == 'ATENDIDA'}" class="badge badge-atendida">Atendida</span>
+                    </td>
+                    <td>
+                        <div class="d-flex flex-row gap-2">
+                            <form th:action="@{/doctor/atenderCita}" method="post" th:if="${cita.status != 'ATENDIDA'}" style="display:inline;">
+                                <input type="hidden" name="citaId" th:value="${cita.id}" />
+                                <button type="submit" class="btn btn-success btn-sm btn-attend">
+                                    <i class="bi bi-check-circle"></i> Atendida
+                                </button>
+                            </form>
+                            <a th:href="@{/doctor/editar-diagnostico(citaId=${cita.id})}" class="btn btn-primary btn-sm btn-edit">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                        </div>
+                        <span th:if="${cita.status == 'ATENDIDA'}" class="badge badge-atendida mt-1">Atendida</span>
+                    </td>
+                </tr>
+            </tbody>	
+        </table>
+    </div>
+    <a href="/doctor/dashboard" class="btn btn-secondary mt-3">
+        <i class="bi bi-arrow-left-circle"></i> Volver al Panel
+    </a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
